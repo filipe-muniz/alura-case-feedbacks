@@ -19,9 +19,9 @@ public class GroqSentimentClassifier implements SentimementClassifier{
         this.restTemplate = restTemplate;
     }
     @Override
-    public String classifySentiment(String feedback) {
+    public String classifySentiment(String text) {
         try{
-            GroqRequest req = new GroqRequest("llama3-8b-8192", feedback);
+            GroqRequest req = new GroqRequest("llama3-8b-8192", text);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.setBearerAuth(apiKey);
