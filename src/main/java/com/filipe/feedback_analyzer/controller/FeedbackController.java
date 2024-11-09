@@ -1,5 +1,6 @@
 package com.filipe.feedback_analyzer.controller;
 
+import com.filipe.feedback_analyzer.dto.FeedbackResponseDTO;
 import com.filipe.feedback_analyzer.service.FeedbackService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,7 +15,7 @@ public class FeedbackController {
         this.feedbackService = feedbackService;
     }
     @PostMapping("/classify")
-    public String classifyFeedback(@RequestBody String feedback) {
+    public FeedbackResponseDTO classifyFeedback(@RequestBody String feedback) {
         return feedbackService.classifyFeedback(feedback);
     }
 }
