@@ -21,7 +21,7 @@ public class GroqSentimentClassifier implements Classifier {
         String prompt =  String.format(
                 "Classifique o seguinte feedback em uma das três categorias: POSITIVO, NEGATIVO ou INCONCLUSIVO, baseando-se no tom e conteúdo da mensagem.\n\nFeedback: \"%s\"\n\nPor favor, forneça apenas a classificação final seguindo o exemplo:",
                 text);
-        Optional<String> response = groqClient.requestPrompt("llama3-8b-8192", prompt);
+        Optional<String> response = groqClient.requestPrompt("llama3-70b-8192", prompt);
 
         if (response.isPresent()) {
             String classification = response.get().trim().toUpperCase();

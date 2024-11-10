@@ -34,11 +34,12 @@ public class FeedbackService {
     }
 
     public FeedbackResponseDTO classifyAndSaveFeedback(String feedbackText) {
+
         if (isSpam(feedbackText)) {
             return new FeedbackResponseDTO(0, "SPAM", null);
         }
-
         try {
+
             String sentiment = classifySentiment(feedbackText);
             FeedbackResponseDTO.RequestedFeature requestedFeature = classifyTopic(feedbackText);
 

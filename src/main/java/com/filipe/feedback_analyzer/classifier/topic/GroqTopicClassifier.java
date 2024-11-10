@@ -21,7 +21,7 @@ public class GroqTopicClassifier implements Classifier {
     public String classify(String text) {
 
         String prompt = buildTopicPrompt(text);
-        Optional<String> response = groqClient.requestPrompt("llama3-8b-8192", prompt);
+        Optional<String> response = groqClient.requestPrompt("llama3-70b-8192", prompt);
         if(response.isPresent()) {
             return response.get();
         }

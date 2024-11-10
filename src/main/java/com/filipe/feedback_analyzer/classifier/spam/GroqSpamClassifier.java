@@ -19,17 +19,11 @@ public class GroqSpamClassifier implements Classifier {
 
     @Override
     public String classify(String text) {
-        String prompt = String.format("Verifique se o seguinte feedback é um SPAM. " +
-                        "\n\nFeedback: \"%s\"\n\nPor favor, forneça apenas \"SIM\" se for SPAM ou \"NÃO\" se não for:",
+        String prompt = String.format("A AluMind é uma startup de bem-estar e saúde mental, oferecendo meditações guiadas, terapia, e conteúdos educativos para os usuários. O feedback abaixo foi enviado por um usuário e precisa ser classificado para identificar se é SPAM. Um feedback é considerado SPAM se for ofensivo, irrelevante, ou não relacionado aos serviços da AluMind.\n\nFeedback: \"%s\"\n\nPor favor, responda com 'SIM' se o feedback for SPAM (ou seja, ofensivo, irrelevante ou sem relação com a AluMind) ou 'NAO' se o feedback for relevante e construtivo:",
                 text);
-        Optional<String> response = groqClient.requestPrompt("llama3-8b-8192", prompt);
+        Optional<String> response = groqClient.requestPrompt("llama3-70b-8192", prompt);
         if (response.isPresent()) {
-            String classification = response.get().trim().toUpperCase();
-            if (VALID_RESPONSES.contains(classification)) {
-                return classification;
-            } else {
-                throw new FeedbackClassificationException("Classificação inválida recebida: " + classification, null);
-            }
+            return response.get();
         } else {
             throw new FeedbackClassificationException("Falha ao receber resposta da API para o feedback: " + text, null);
         }
