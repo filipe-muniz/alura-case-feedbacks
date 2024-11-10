@@ -1,42 +1,61 @@
 package com.filipe.feedback_analyzer.service;
 
-
 import com.filipe.feedback_analyzer.classifier.sentiment.GroqSentimentClassifier;
 import com.filipe.feedback_analyzer.classifier.topic.GroqTopicClassifier;
-import com.filipe.feedback_analyzer.classifier.spam.GroqSpamClassifier; // Importando o classificador de SPAM
+import com.filipe.feedback_analyzer.classifier.spam.GroqSpamClassifier;
 import com.filipe.feedback_analyzer.dto.FeatureCode;
 import com.filipe.feedback_analyzer.dto.FeedbackResponseDTO;
+import com.filipe.feedback_analyzer.entity.Feedback;
+import com.filipe.feedback_analyzer.repository.FeedbackRepository;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FeedbackService {
 
-    private final GroqSpamClassifier spamClassifier; // Adicionando o classificador de SPAM
-    private final GroqSentimentClassifier sentimementClassifier;
+    private final GroqSpamClassifier spamClassifier;
+    private final GroqSentimentClassifier sentimentClassifier;
     private final GroqTopicClassifier topicClassifier;
+    private final FeedbackRepository feedbackRepository;
 
-    public FeedbackService(GroqSpamClassifier spamClassifier, GroqSentimentClassifier sentimementClassifier, GroqTopicClassifier topicClassifier) {
-        this.spamClassifier = spamClassifier; // Inicializando o classificador de SPAM
-        this.sentimementClassifier = sentimementClassifier;
+    public FeedbackService(GroqSpamClassifier spamClassifier,
+                           GroqSentimentClassifier sentimentClassifier,
+                           GroqTopicClassifier topicClassifier,
+                           FeedbackRepository feedbackRepository) {
+        this.spamClassifier = spamClassifier;
+        this.sentimentClassifier = sentimentClassifier;
         this.topicClassifier = topicClassifier;
+        this.feedbackRepository = feedbackRepository;
     }
 
-    public FeedbackResponseDTO classifyFeedback(String feedback) {
+    public FeedbackResponseDTO classifyAndSaveFeedback(String feedbackText) {
 
-        String isSpam = spamClassifier.classify(feedback);
-        if (isSpam.equalsIgnoreCase("SIM")) {
+        if (isSpam(feedbackText)) {
             return new FeedbackResponseDTO(0, "SPAM", null);
         }
+        String sentiment = classifySentiment(feedbackText);
+        FeedbackResponseDTO.RequestedFeature requestedFeature = classifyTopic(feedbackText);
 
-        String sentiment = sentimementClassifier.classify(feedback);
-        String topicClassification = topicClassifier.classify(feedback);
+
+        Feedback feedback = new Feedback(feedbackText, sentiment, requestedFeature.getCode(), requestedFeature.getReason());
+        feedbackRepository.save(feedback);
+
+        return new FeedbackResponseDTO(1, sentiment, requestedFeature);
+    }
+
+    private boolean isSpam(String feedbackText) {
+        String isSpam = spamClassifier.classify(feedbackText);
+        return isSpam.equalsIgnoreCase("SIM");
+    }
+
+    private String classifySentiment(String feedbackText) {
+        return sentimentClassifier.classify(feedbackText);
+    }
+
+    private FeedbackResponseDTO.RequestedFeature classifyTopic(String feedbackText) {
+        String topicClassification = topicClassifier.classify(feedbackText);
         String[] parts = topicClassification.split(";", 2);
         String code = parts[0].trim();
         String reason = parts[1].trim();
-
-        FeedbackResponseDTO.RequestedFeature requestedFeature = new FeedbackResponseDTO.RequestedFeature(
-                FeatureCode.values()[Integer.parseInt(code)].name(), reason);
-
-        return new FeedbackResponseDTO(1, sentiment, requestedFeature);
+        return new FeedbackResponseDTO.RequestedFeature(FeatureCode.values()[Integer.parseInt(code)].name(), reason);
     }
 }
