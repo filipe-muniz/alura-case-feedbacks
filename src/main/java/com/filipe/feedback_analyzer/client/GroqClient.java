@@ -5,7 +5,11 @@ import com.filipe.feedback_analyzer.dto.GroqResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Optional;
 
 @Component
 public class GroqClient {
@@ -21,7 +25,7 @@ public class GroqClient {
         this.restTemplate = restTemplate;
     }
 
-    public String requestPrompt(String model, String text) {
+    public Optional<String> requestPrompt(String model, String text) {
         try {
             GroqRequest req = new GroqRequest(model, text);
             HttpHeaders headers = new HttpHeaders();
@@ -36,10 +40,19 @@ public class GroqClient {
                     GroqResponse.class
             );
 
-            return res.getBody().getChoices().get(0).getMessage().getContent();
+            GroqResponse responseBody = res.getBody();
+            if (responseBody != null && responseBody.getChoices() != null && !responseBody.getChoices().isEmpty()) {
+                String content = responseBody.getChoices().get(0).getMessage().getContent();
+                return Optional.ofNullable(content);
+            } else {
+                System.err.println("Resposta do Groq não contém dados válidos.");
+                return Optional.empty();
+            }
+        } catch (HttpClientErrorException | HttpServerErrorException e) {
+            System.err.println("Erro de cliente/servidor na API Groq: " + e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
-            return "Erro ao analisar o texto.";
+            System.err.println("Erro inesperado ao analisar o texto: " + e.getMessage());
         }
+        return Optional.empty();
     }
 }
