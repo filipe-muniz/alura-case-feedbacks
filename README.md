@@ -46,3 +46,20 @@ Para classificar um feedback, envie uma requisição POST para o endpoint da apl
 ```
 Após enviar a requisição, a aplicação retornará a classificação do feedback com base no modelo LLM Llama-3-70b.
 
+## Respostas obtidas(sentimentos/spam)
+
+
+![img.png](img/sentiment.png)
+
+![img.png](img/spam.png)
+
+## Nova feature/Sugestão
+
+A última etapa do case é sugerir uma nova feature.
+Para a última etapa do case, sugiro uma nova funcionalidade que pode trazer melhorias significativas para o sistema: a implementação de um [ensemble](https://en.wikipedia.org/wiki/Ensemble_averaging_(machine_learning)) de classificadores.
+
+A ideia é utilizar múltiplos classificadores para avaliar cada feedback. Cada um desses classificadores emitiria uma "votação" sobre a classificação (positiva ou negativa) do feedback, e o resultado final seria definido com base no voto da maioria. Essa abordagem permite aumentar a precisão, pois combina as previsões de diversos modelos, reduzindo o impacto de erros individuais. Com isso, espera-se que a detecção de sentimentos seja mais robusta e consistente.
+
+Considerando o código que já temos, substituir a LLM (Large Language Model) responsável pela classificação é uma tarefa relativamente simples. Isso se deve ao fato de o sistema ter sido projetado com uma interface chamada Classifier. Essa interface define os métodos e comportamentos esperados para qualquer modelo de classificação, independentemente da implementação específica.
+
+Assim, para trocar o classificador, basta criar uma nova implementação que siga essa interface, sem a necessidade de modificar o restante do código.
